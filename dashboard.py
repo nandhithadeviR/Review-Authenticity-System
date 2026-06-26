@@ -25,7 +25,25 @@ st.set_page_config(page_title="Review Authenticity Dashboard", layout="wide")
 
 st.title("🛡️ ReviewGaurd")
 st.markdown("Real-time cloud monitoring pipeline for processed browser extension reviews.")
+# Catch incoming automated streams from the ReviewGuard Browser Extension
+query_params = st.query_params
 
+if "incoming_review" in query_params:
+    remote_text = query_params["incoming_review"]
+    remote_platform = query_params.get("platform", "Extension")
+    remote_domain = query_params.get("domain", "General")
+    
+    # Run the analysis engine immediately on the intercepted data
+    score_results = calculate_trust_score(remote_text, remote_platform, remote_domain)
+    
+    # Log it straight to your dashboard visualizer screen
+    new_log = {
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "review_text": remote_text,
+        "trust_score": score_results["trust_score"],
+        "status": score_results["status"]
+    }
+    st.session_state.reviews_log.insert(0, new_log)
 # --- API Endpoint Simulation for the Extension ---
 # This allows the dashboard to display incoming requests
 query_params = st.query_params
