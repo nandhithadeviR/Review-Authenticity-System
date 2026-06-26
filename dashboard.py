@@ -3,7 +3,19 @@ import pandas as pd
 import random
 from datetime import datetime
 from analyzer import calculate_trust_score
+import streamlit as st
+import os
 
+# --- Automatic spaCy Cloud Downloader ---
+try:
+    import spacy
+    # Try loading the model
+    nlp = spacy.load("en_core_web_sm")
+except OSError:
+    # If not found, download it automatically on the cloud server
+    os.system("python -m spacy download en_core_web_sm")
+    import spacy
+    nlp = spacy.load("en_core_web_sm")
 # Initialize session state for review logs if it doesn't exist
 if "reviews_log" not in st.session_state:
     st.session_state.reviews_log = [
