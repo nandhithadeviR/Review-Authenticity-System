@@ -2,19 +2,13 @@ import streamlit as st
 import pandas as pd
 import random
 from datetime import datetime
-import os
+import spacy
 
-# --- Force spaCy Download Directly From Web ---
-try:
-    import spacy
-    nlp = spacy.load("en_core_web_sm")
-except OSError:
-    # This downloads the small English model directly via pip within the running script
-    os.system("pip install https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.0/en_core_web_sm-3.7.0-py3-none-any.whl")
-    import spacy
-    nlp = spacy.load("en_core_web_sm")
+# Initialize the model normally
+nlp = spacy.load("en_core_web_sm")
 
 from analyzer import calculate_trust_score
+    
 # Initialize session state for review logs if it doesn't exist
 if "reviews_log" not in st.session_state:
     st.session_state.reviews_log = [
