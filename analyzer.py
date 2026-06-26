@@ -28,8 +28,16 @@ def init_db():
 init_db()
 
 # Load lightweight NLP model
-nlp = spacy.load("en_core_web_sm")
+import os
+import spacy
 
+try:
+    nlp = spacy.load("en_core_web_sm")
+    print("spaCy model loaded successfully!")
+except OSError:
+    print("spaCy model not found. Downloading it now...")
+    os.system("python -m spacy download en_core_web_sm")
+    nlp = spacy.load("en_core_web_sm")
 # Load a dedicated AI detector from Hugging Face
 print("Loading Deep Learning AI Detection Model... (This might take a minute on first run)")
 try:
