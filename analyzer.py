@@ -129,12 +129,12 @@ if total_sentences > 2:
         reasons.append(f"Linguistic Alert: High promotional keyword density (-{deduction} pts).")
 
     # Final Boundary Normalization
-    score = max(0, min(score, 100))
+        score = max(0, min(score, 100))
     
-    status = "Authentic" if score >= 75 else "Suspicious" if score >= 45 else "Flagged/Fake"
+        status = "Authentic" if score >= 75 else "Suspicious" if score >= 45 else "Flagged/Fake"
     
-    return {
-        "trust_score": score,
-        "status": status,
-        "reasons": reasons if reasons else ["Review demonstrates natural, high-integrity human patterns."]
-    }
+        return {
+                "trust_score": score,
+                "status": status,
+                "reasons": reasons if reasons else ["Review demonstrates natural, high-integrity human patterns."]
+        }
