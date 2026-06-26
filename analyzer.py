@@ -1,6 +1,5 @@
 import re
 import sqlite3
-import spacy
 from transformers import pipeline
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
@@ -28,7 +27,7 @@ def init_db():
 init_db()
 
 # Load lightweight NLP model
-nlp = spacy.load("en_core_web_sm")
+
 
 # Load a dedicated AI detector from Hugging Face
 print("Loading Deep Learning AI Detection Model... (This might take a minute on first run)")
@@ -96,18 +95,31 @@ def calculate_trust_score(review_text: str, current_platform: str, current_domai
             pass
 
     # --- 3. Advanced Stylometric Checks (Sentence Consistency) ---
-    doc = nlp(review_text)
-    sentences = list(doc.sents)
-    avg_sentence_len = len(doc) / len(sentences) if sentences else 0
-    
-    if len(sentences) > 2:
-        lengths = [len(s) for s in sentences]
-        variance = sum((l - avg_sentence_len) ** 2 for l in lengths) / len(lengths)
-        # Low variance means robotic, identical sentence structures
-        if variance < 3.0:
-            score -= 15
-            reasons.append("Linguistic Pattern: Unusually low sentence length variance. Structure mimics bot automation (-15 pts).")
+# Clean up text and split into sentences using standard punctuation rules (. ! ?)
+import re
+import math
 
+# This splits text by periods, exclamation marks, or question marks cleanly
+sentences = [s.strip() for s in re.split(r'[.!?]+', review_text) if s.strip()]
+
+# Count total words to calculate average length
+words = [w for w in review_text.split() if w]
+total_words = len(words)
+total_sentences = len(sentences)
+
+avg_sentence_len = total_words / total_sentences if total_sentences else 0
+
+if total_sentences > 2:
+    # Calculate word count for each sentence
+    lengths = [len(s.split()) for s in sentences]
+    
+    # Calculate variance manually without any external libraries
+    variance = sum((l - avg_sentence_len) ** 2 for l in lengths) / total_sentences
+    
+    # Low variance means robotic, identical sentence structures
+    if variance < 3.0:
+        score -= 15
+        reasons.append("Linguistic Pattern: Unusually low sentence structure variance")
     # --- 4. Marketing/Promotional Density Analysis ---
     promo_keywords = r'\b(buy now|click here|best ever|mega discount|guaranteed results|use code|absolute best)\b'
     matches = len(re.findall(promo_keywords, review_text.lower()))
