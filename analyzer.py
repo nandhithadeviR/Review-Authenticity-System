@@ -1,5 +1,6 @@
 import re
 import sqlite3
+import math
 from transformers import pipeline
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
@@ -25,9 +26,6 @@ def init_db():
 
 # Initialize Database on load
 init_db()
-
-# Load lightweight NLP model
-
 
 # Load a dedicated AI detector from Hugging Face
 print("Loading Deep Learning AI Detection Model... (This might take a minute on first run)")
@@ -95,31 +93,28 @@ def calculate_trust_score(review_text: str, current_platform: str, current_domai
             pass
 
     # --- 3. Advanced Stylometric Checks (Sentence Consistency) ---
-# Clean up text and split into sentences using standard punctuation rules (. ! ?)
-import re
-import math
+    # This splits text by periods, exclamation marks, or question marks cleanly
+    sentences = [s.strip() for s in re.split(r'[.!?]+', review_text) if s.strip()]
 
-# This splits text by periods, exclamation marks, or question marks cleanly
-sentences = [s.strip() for s in re.split(r'[.!?]+', review_text) if s.strip()]
+    # Count total words to calculate average length
+    words = [w for w in review_text.split() if w]
+    total_words = len(words)
+    total_sentences = len(sentences)
 
-# Count total words to calculate average length
-words = [w for w in review_text.split() if w]
-total_words = len(words)
-total_sentences = len(sentences)
+    avg_sentence_len = total_words / total_sentences if total_sentences else 0
 
-avg_sentence_len = total_words / total_sentences if total_sentences else 0
-
-if total_sentences > 2:
-    # Calculate word count for each sentence
-    lengths = [len(s.split()) for s in sentences]
-    
-    # Calculate variance manually without any external libraries
-    variance = sum((l - avg_sentence_len) ** 2 for l in lengths) / total_sentences
-    
-    # Low variance means robotic, identical sentence structures
-    if variance < 3.0:
-        score -= 15
-        reasons.append("Linguistic Pattern: Unusually low sentence structure variance")
+    if total_sentences > 2:
+        # Calculate word count for each sentence
+        lengths = [len(s.split()) for s in sentences]
+        
+        # Calculate variance manually without any external libraries
+        variance = sum((l - avg_sentence_len) ** 2 for l in lengths) / total_sentences
+        
+        # Low variance means robotic, identical sentence structures
+        if variance < 3.0:
+            score -= 15
+            reasons.append("Linguistic Pattern: Unusually low sentence structure variance")
+            
     # --- 4. Marketing/Promotional Density Analysis ---
     promo_keywords = r'\b(buy now|click here|best ever|mega discount|guaranteed results|use code|absolute best)\b'
     matches = len(re.findall(promo_keywords, review_text.lower()))
@@ -128,7 +123,7 @@ if total_sentences > 2:
         score -= deduction
         reasons.append(f"Linguistic Alert: High promotional keyword density (-{deduction} pts).")
 
-   # --- 4. Final Boundary Normalization ---
+    # --- 5. Final Boundary Normalization ---
     score = max(0, min(score, 100))
     
     if score >= 75:
