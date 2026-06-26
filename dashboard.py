@@ -23,7 +23,7 @@ if "reviews_log" not in st.session_state:
 
 st.set_page_config(page_title="Review Authenticity Dashboard", layout="wide")
 
-st.title("🛡️ Review Authenticity Verification System")
+st.title("🛡️ ReviewGaurd")
 st.markdown("Real-time cloud monitoring pipeline for processed browser extension reviews.")
 
 # --- API Endpoint Simulation for the Extension ---
