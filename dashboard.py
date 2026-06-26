@@ -2,11 +2,6 @@ import streamlit as st
 import pandas as pd
 import random
 from datetime import datetime
-import spacy
-
-# Initialize the model normally
-nlp = spacy.load("en_core_web_sm")
-
 from analyzer import calculate_trust_score
     
 # Initialize session state for review logs if it doesn't exist
