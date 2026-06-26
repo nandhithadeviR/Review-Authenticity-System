@@ -29,7 +29,8 @@ st.markdown("Real-time cloud monitoring pipeline for processed browser extension
 query_params = st.query_params
 
 if "incoming_review" in query_params:
-    remote_text = query_params["incoming_review"]
+    # UPDATED: Use .get() method directly on st.query_params
+    remote_text = query_params.get("incoming_review")
     remote_platform = query_params.get("platform", "Extension")
     remote_domain = query_params.get("domain", "General")
     
@@ -40,10 +41,16 @@ if "incoming_review" in query_params:
     new_log = {
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "review_text": remote_text,
-        "trust_score": score_results["trust_score"],
-        "status": score_results["status"]
+        "trust_score": score_results.get("trust_score", 50.0),
+        "status": score_results.get("status", "Analyzed")
     }
-    st.session_state.reviews_log.insert(0, new_log)
+    
+    if "reviews_log" not in st.session_state:
+        st.session_state.reviews_log = []
+        
+    # Prevent duplicates if the browser double-fires
+    if not any(d['review_text'] == remote_text for d in st.session_state.reviews_log):
+        st.session_state.reviews_log.insert(0, new_log)
 # --- API Endpoint Simulation for the Extension ---
 # This allows the dashboard to display incoming requests
 query_params = st.query_params
